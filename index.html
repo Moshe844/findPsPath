@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Accessible Paths</title>
+</head>
+<body>
+    <h1>Find Accessible Paths</h1>
+    <button onclick="findAccessiblePaths()">Find Paths</button>
+    <div id="output"></div>
+
+    <script>
+        const base_url = "https://secure.cardknox.com/";
+
+        async function checkUrl(url) {
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const text = await response.text();
+                    if (!text.toLowerCase().includes("page not found")) {
+                        return true;
+                    }
+                }
+            } catch (error) {
+                console.error("Error checking URL:", error);
+            }
+            return false;
+        }
+
+        async function findAccessiblePaths() {
+            const outputDiv = document.getElementById("output");
+            outputDiv.innerHTML = "<p>Finding accessible paths...</p>";
+
+            const alphabet = "abcdefghijklmnopqrstuvwxyz";
+            const maxLength = 100;
+
+            for (let length = 1; length <= maxLength; length++) {
+                for (const combination of generateCombinations(alphabet, length)) {
+                    const path = combination.join("");
+                    const url = base_url + path;
+                    if (await checkUrl(url)) {
+                        outputDiv.innerHTML += `<p>Accessible path found: ${url}</p>`;
+                    }
+                }
+            }
+
+            outputDiv.innerHTML += "<p>Search completed.</p>";
+        }
+
+        function* generateCombinations(alphabet, length) {
+            if (length === 0) {
+                yield [];
+            } else {
+                for (const char of alphabet) {
+                    for (const combination of generateCombinations(alphabet, length - 1)) {
+                        yield [char, ...combination];
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
